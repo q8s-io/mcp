@@ -1,0 +1,25 @@
+version: '3.7'
+services:
+  mysql:
+    image: mysql:5.7
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
+    environment:
+      - MYSQL_ROOT_PASSWORD=111111
+      - MYSQL_DATABASE=mcp
+    ports:
+      - 3306:3306
+  mcp-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - ARCH=amd64
+    image: docker.io/q8sio/mcp:dev
+    depends_on:
+      - mysql
+    command: "/wait-for.sh mysql:3306 -- /manager --config=configs/config-dev.yaml"
+    volumes:
+      - "./configs/config-dev.yaml:/configs/config-dev.yaml"
+      - "./wait-for.sh:/wait-for.sh"

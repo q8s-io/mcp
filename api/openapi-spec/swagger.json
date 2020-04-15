@@ -1,0 +1,277 @@
+{
+	"swagger": "2.0",
+	"paths": {
+		"/api/v1/clusters": {
+			"get": {
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/json"
+				],
+				"summary": "Get clusters",
+				"operationId": "all",
+				"responses": {
+					"200": {
+						"description": "OK",
+						"schema": {
+							"type": "array",
+							"items": {
+								"$ref": "#/definitions/cluster.AttachedClusterResp"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/clusters/attach": {
+			"post": {
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/json"
+				],
+				"summary": "Attach cluster",
+				"operationId": "attach",
+				"parameters": [
+					{
+						"type": "int",
+						"description": "Id of the cluster",
+						"name": "id",
+						"in": "path",
+						"required": true
+					},
+					{
+						"name": "body",
+						"in": "body",
+						"required": true,
+						"schema": {
+							"$ref": "#/definitions/cluster.AttachedClusterReq"
+						}
+					}
+				],
+				"responses": {
+					"201": {
+						"description": "OK",
+						"schema": {
+							"$ref": "#/definitions/cluster.AttachedClusterResp"
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/clusters/{id}": {
+			"get": {
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/json"
+				],
+				"summary": "Get cluster by id",
+				"operationId": "get",
+				"parameters": [
+					{
+						"type": "int",
+						"description": "Id of the cluster",
+						"name": "id",
+						"in": "path",
+						"required": true
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"schema": {
+							"$ref": "#/definitions/cluster.AttachedClusterResp"
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/clusters/{id}/kubeconfig": {
+			"get": {
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/json"
+				],
+				"summary": "Get cluster kubeconfig by cluster id",
+				"operationId": "get",
+				"parameters": [
+					{
+						"type": "int",
+						"description": "Id of the cluster",
+						"name": "id",
+						"in": "path",
+						"required": true
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"schema": {
+							"$ref": "#/definitions/kubeconfig.ClusterKubeconfigResp"
+						}
+					}
+				}
+			}
+		}
+	},
+	"definitions": {
+		"cluster.AttachedClusterReq": {
+			"required": [
+				"name",
+				"kubeconfig",
+				"context"
+			],
+			"properties": {
+				"context": {
+					"description": "Context of kubeconfig.",
+					"type": "string"
+				},
+				"kubeconfig": {
+					"description": "Kubeconfig info with Base64 format.",
+					"type": "string"
+				},
+				"name": {
+					"description": "Name of attached cluster.",
+					"type": "string"
+				}
+			}
+		},
+		"cluster.AttachedClusterResp": {
+			"required": [
+				"id",
+				"name",
+				"status",
+				"createdAt",
+				"provider"
+			],
+			"properties": {
+				"createdAt": {
+					"description": "Created time of attached cluster.",
+					"type": "string",
+					"format": "date-time"
+				},
+				"id": {
+					"description": "ID of attached cluster.",
+					"type": "integer",
+					"format": "integer"
+				},
+				"name": {
+					"description": "Name of attached cluster.",
+					"type": "string"
+				},
+				"provider": {
+					"description": "Provider of attached cluster. Empty if no provider.",
+					"type": "string"
+				},
+				"status": {
+					"description": "Status of attached cluster.",
+					"type": "string"
+				}
+			}
+		},
+		"cluster.Cluster": {
+			"required": [
+				"ID",
+				"CreatedAt",
+				"UpdatedAt",
+				"DeletedAt",
+				"Kubeconfig",
+				"KubeconfigID",
+				"Name",
+				"Provider",
+				"Status"
+			],
+			"properties": {
+				"CreatedAt": {
+					"type": "string",
+					"format": "date-time"
+				},
+				"DeletedAt": {
+					"type": "string",
+					"format": "date-time"
+				},
+				"ID": {
+					"type": "integer",
+					"format": "integer"
+				},
+				"Kubeconfig": {
+					"$ref": "#/definitions/kubeconfig.Kubeconfig"
+				},
+				"KubeconfigID": {
+					"type": "integer",
+					"format": "integer"
+				},
+				"Name": {
+					"type": "string"
+				},
+				"Provider": {
+					"type": "string"
+				},
+				"Status": {
+					"type": "integer",
+					"format": "integer"
+				},
+				"UpdatedAt": {
+					"type": "string",
+					"format": "date-time"
+				}
+			}
+		},
+		"kubeconfig.ClusterKubeconfigResp": {
+			"required": [
+				"kubeconfig",
+				"context"
+			],
+			"properties": {
+				"context": {
+					"description": "Context of kubeconfig",
+					"type": "string"
+				},
+				"kubeconfig": {
+					"description": "Kubeconfig info with Base64 format",
+					"type": "string"
+				}
+			}
+		},
+		"kubeconfig.Kubeconfig": {
+			"required": [
+				"ID",
+				"CreatedAt",
+				"UpdatedAt",
+				"DeletedAt",
+				"Kubeconfig",
+				"Context"
+			],
+			"properties": {
+				"Context": {
+					"type": "string"
+				},
+				"CreatedAt": {
+					"type": "string",
+					"format": "date-time"
+				},
+				"DeletedAt": {
+					"type": "string",
+					"format": "date-time"
+				},
+				"ID": {
+					"type": "integer",
+					"format": "integer"
+				},
+				"Kubeconfig": {
+					"type": "string"
+				},
+				"UpdatedAt": {
+					"type": "string",
+					"format": "date-time"
+				}
+			}
+		}
+	}
+}
