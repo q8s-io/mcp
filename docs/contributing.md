@@ -5,12 +5,12 @@ about the prospect of you joining us!
 
 ## Before You Begin
 
-we strongly recommend you to use goland and unified configuration as follows:
+- we strongly recommend you to use goland and unified configuration as follows:
 ![image](https://github.com/DoubleBabylol/mcp/blob/0.1.1/docs/config.png)
 
-We strongly recommend you to understand the main [develop.md](https://github.com/q8s-io/mcp/blob/master/docs/develop.md) and adhere to the contribution rules .
+- We strongly recommend you to understand the main [develop.md](https://github.com/q8s-io/mcp/blob/master/docs/develop.md) and adhere to the contribution rules .
 
-Please be aware that all contributions to Multi Cloud Platform require time and commitment from project maintainers to direct and review work. This is done in additional to many other maintainer responsibilities, and direct engagement from maintainers is a finite resource.
+- Please be aware that all contributions to Multi Cloud Platform require time and commitment from project maintainers to direct and review work. This is done in additional to many other maintainer responsibilities, and direct engagement from maintainers is a finite resource.
 
 
 ## Begin
