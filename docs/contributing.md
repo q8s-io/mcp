@@ -6,7 +6,7 @@ about the prospect of you joining us!
 ## Before You Begin
 
 - we strongly recommend you to use goland and unified configuration as follows:
-![image](https://github.com/DoubleBabylol/mcp/blob/0.1.1/docs/config.png)
+![image](https://github.com/DoubleBabylol/mcp/blob/0.1.1/docs/images/config.png)
 
 - We strongly recommend you to understand the main [develop.md](https://github.com/q8s-io/mcp/blob/master/docs/develop.md) and adhere to the contribution rules .
 
