@@ -6,9 +6,9 @@ about the prospect of you joining us!
 ## Before You Begin
 
 - we strongly recommend you to use goland and unified configuration as follows:
-![image](docs/images/config.png)
+![image](images/config.png)
 
-- We strongly recommend you to understand the main [develop.md](docs/develop.md) and adhere to the contribution rules .
+- We strongly recommend you to understand the main [develop.md](develop.md) and adhere to the contribution rules .
 
 - Please be aware that all contributions to Multi Cloud Platform require time and commitment from project maintainers to direct and review work. This is done in additional to many other maintainer responsibilities, and direct engagement from maintainers is a finite resource.
 
