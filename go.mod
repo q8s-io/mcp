@@ -12,8 +12,11 @@ require (
 	github.com/jinzhu/gorm v1.9.12
 	github.com/stretchr/testify v1.4.0
 	gopkg.in/yaml.v2 v2.2.8
+	k8s.io/api v0.17.2
 	k8s.io/apimachinery v0.17.2
+	k8s.io/client-go v0.17.2
 	k8s.io/klog v1.0.0
 	sigs.k8s.io/cluster-api v0.3.3
+	sigs.k8s.io/cluster-api-provider-azure v0.4.1
 	sigs.k8s.io/controller-runtime v0.5.2
 )
