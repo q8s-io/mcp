@@ -1,18 +1,47 @@
 package azure
 
 import (
+	"context"
+
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/intstr"
+
+	"github.com/q8s-io/mcp/pkg/k8s"
+	"github.com/q8s-io/mcp/pkg/k8s/cluster"
 )
 
-func GetComponents() {
-	namespace := "tenant-gzw"
+type Providers struct {
+	objects []runtime.Object
+}
 
+func NewProviderComponents() cluster.Components {
+	components := &Providers{
+		objects: make([]runtime.Object, 8),
+	}
+	components.Setup()
+	return components
+}
+
+func (p *Providers) Create() {
+	for _, component := range p.objects {
+		k8s.GetManager().GetClient().Create(context.TODO(), component)
+	}
+}
+
+func (p *Providers) Delete() {
+	for _, component := range p.objects {
+		k8s.GetManager().GetClient().Delete(context.TODO(), component)
+	}
+}
+
+func (p *Providers) Setup() {
+	namespace := "tenant-gzw"
 	// Namespace
-	_ = v1.Namespace{
+	p.objects[0] = &v1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: namespace,
 			Labels: map[string]string{
@@ -22,7 +51,7 @@ func GetComponents() {
 	}
 
 	// ClusterRoleBinding
-	_ = rbacv1.ClusterRoleBinding{
+	p.objects[1] = &rbacv1.ClusterRoleBinding{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: namespace + "-manager-rolebinding",
 			Labels: map[string]string{
@@ -43,7 +72,8 @@ func GetComponents() {
 		},
 	}
 
-	_ = rbacv1.ClusterRoleBinding{
+	// ClusterRoleBinding
+	p.objects[2] = &rbacv1.ClusterRoleBinding{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: namespace + "-proxy-rolebinding",
 			Labels: map[string]string{
@@ -65,7 +95,7 @@ func GetComponents() {
 	}
 
 	// Role
-	_ = rbacv1.Role{
+	p.objects[3] = &rbacv1.Role{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: namespace,
 			Name:      "capz-leader-election-role",
@@ -88,7 +118,7 @@ func GetComponents() {
 	}
 
 	// RoleBinding
-	_ = rbacv1.RoleBinding{
+	p.objects[4] = &rbacv1.RoleBinding{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: namespace,
 			Name:      "capz-leader-election-rolebinding",
@@ -111,7 +141,7 @@ func GetComponents() {
 	}
 
 	// Secret
-	_ = v1.Secret{
+	p.objects[5] = &v1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: namespace,
 			Name:      "capz-manager-bootstrap-credentials",
@@ -128,7 +158,7 @@ func GetComponents() {
 	}
 
 	// Service
-	_ = v1.Service{
+	p.objects[6] = &v1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: namespace,
 			Name:      "capz-controller-manager-metrics-service",
@@ -158,9 +188,7 @@ func GetComponents() {
 	}
 
 	// Deployment
-	replicas := int32(1)
-	terminationGracePeriodSeconds := int64(10)
-	_ = appsv1.Deployment{
+	p.objects[7] = &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: namespace,
 			Name:      "capz-controller-manager",
@@ -170,7 +198,10 @@ func GetComponents() {
 			},
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: &replicas,
+			Replicas: func() *int32 {
+				replicas := int32(1)
+				return &replicas
+			}(),
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
 					"cluster.x-k8s.io/provider": "infrastructure-azure",
@@ -277,7 +308,10 @@ func GetComponents() {
 							},
 						},
 					},
-					TerminationGracePeriodSeconds: &terminationGracePeriodSeconds,
+					TerminationGracePeriodSeconds: func() *int64 {
+						terminationGracePeriodSeconds := int64(10)
+						return &terminationGracePeriodSeconds
+					}(),
 				},
 			},
 		},

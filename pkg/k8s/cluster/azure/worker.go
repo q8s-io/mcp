@@ -1,28 +1,59 @@
 package azure
 
 import (
+	"context"
+
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	clusterazurev1 "sigs.k8s.io/cluster-api-provider-azure/api/v1alpha3"
 	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha3"
 	bootstrapv1 "sigs.k8s.io/cluster-api/bootstrap/kubeadm/api/v1alpha3"
 	bootstraptypesv1 "sigs.k8s.io/cluster-api/bootstrap/kubeadm/types/v1beta1"
+
+	"github.com/q8s-io/mcp/pkg/k8s"
+	"github.com/q8s-io/mcp/pkg/k8s/cluster"
 )
 
-func GetWorker() {
+type Workers struct {
+	objects []runtime.Object
+}
+
+func NewWorkerComponents() cluster.Components {
+	workers := &Workers{
+		objects: make([]runtime.Object, 3),
+	}
+	workers.Setup()
+	return workers
+}
+
+func (w *Workers) Create() {
+	for _, component := range w.objects {
+		k8s.GetManager().GetClient().Create(context.TODO(), component)
+	}
+}
+
+func (w *Workers) Delete() {
+	for _, component := range w.objects {
+		k8s.GetManager().GetClient().Delete(context.TODO(), component)
+	}
+}
+
+func (w *Workers) Setup() {
 	namespace := "tenant-gzw"
 
 	// MachineDeployment
-	replica := int32(1)
-	version := "v1.18.1"
-	_ = clusterv1.MachineDeployment{
+	w.objects[0] = &clusterv1.MachineDeployment{
 		ObjectMeta: v1.ObjectMeta{
 			Namespace: namespace,
 			Name:      "test-gzw-md-0",
 		},
 		Spec: clusterv1.MachineDeploymentSpec{
 			ClusterName: "test-gzw",
-			Replicas:    &replica,
+			Replicas: func() *int32 {
+				replica := int32(1)
+				return &replica
+			}(),
 			Selector: v1.LabelSelector{
 				MatchLabels: map[string]string{
 					"matchLabels": "null",
@@ -31,7 +62,10 @@ func GetWorker() {
 			Template: clusterv1.MachineTemplateSpec{
 				Spec: clusterv1.MachineSpec{
 					ClusterName: "test-gzw",
-					Version:     &version,
+					Version: func() *string {
+						version := "v1.18.1"
+						return &version
+					}(),
 					Bootstrap: clusterv1.Bootstrap{
 						ConfigRef: &corev1.ObjectReference{
 							APIVersion: "bootstrap.cluster.x-k8s.io/v1alpha3",
@@ -52,7 +86,7 @@ func GetWorker() {
 	}
 
 	// AzureMachineTemplate
-	_ = clusterazurev1.AzureMachineTemplate{
+	w.objects[1] = &clusterazurev1.AzureMachineTemplate{
 		ObjectMeta: v1.ObjectMeta{
 			Namespace: namespace,
 			Name:      "test-gzw-md-0",
@@ -76,7 +110,7 @@ func GetWorker() {
 	}
 
 	// KubeadmConfigTemplate
-	_ = bootstrapv1.KubeadmConfigTemplate{
+	w.objects[2] = &bootstrapv1.KubeadmConfigTemplate{
 		ObjectMeta: v1.ObjectMeta{
 			Namespace: namespace,
 			Name:      "test-gzw-md-0",
