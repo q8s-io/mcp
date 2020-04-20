@@ -91,6 +91,40 @@ machine
 
 ### 状态梳理
 
+准备阶段：
+
+1. kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v0.14.2/cert-manager.yaml
+
+2. kubectl apply -f https://github.com/kubernetes-sigs/cluster-api/releases/download/v0.3.3/cluster-api-components.yaml
+
+3. kubectl apply -f cluster-api-provider-azure-components-common.yaml
+
+
+
+### 创建集群步骤：
+
+1. kubectl apply -f cluster-api-provider-azure-components-tenant.yaml
+    OK: pod ready
+    namespace 每个租户绑定
+    kubectl wait --for=condition=Ready --timeout=5m -n capz-system pod -l cluster.x-k8s.io/provider=infrastructure-azure
+
+2. 创建cluster，kubectl apply -f azure-cluster-master-gzw-1.yaml
+    OK: Cluster.Status.InfrastructureReady=true
+
+3. 创建control-plane，kubectl apply -f azure-cluster-master-gzw-2.yaml
+    OK: Cluster.Status.ControlPlaneInitialized=true
+    多少个节点可用 根据control-plane角色的machine Status.NodeRef!=nil决定
+
+4. 创建worker，kubectl apply -f azure-cluster-master-worker-gzw.yaml
+    OK: MachineDeployment.Status
+        ReadyReplicas
+        AvailableReplicas
+
+5. 网络插件
+    OK: Cluster.Status.ControlPlaneReady KubeadmControlPlane.Status.Ready
+
+
+
 Cluster Status:
 - InfrastructureReady
     - 当AzureCluster.Status.Ready = true
@@ -106,6 +140,8 @@ Cluster Status:
     - Deleting 当删除并且infrastructure还没有完全删除
     - Failed 可能需要人工介入
     - Unknown
+
+Master
 
 KubeadmControlPlane Status:
 - Replicas
@@ -123,6 +159,9 @@ KubeadmControlPlane Status:
     - 只会设置一次，不会变更
 - Ready
     - KubeadmControlPlane.Status.ReadyReplicas > 0
+
+
+Worker
 
 MachineDeployment Status:
 - Replicas
