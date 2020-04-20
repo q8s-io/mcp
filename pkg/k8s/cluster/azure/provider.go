@@ -19,11 +19,11 @@ type Providers struct {
 }
 
 func NewProviderComponents() cluster.Components {
-	components := &Providers{
+	providers := &Providers{
 		objects: make([]runtime.Object, 8),
 	}
-	components.Setup()
-	return components
+	providers.Setup()
+	return providers
 }
 
 func (p *Providers) Create() {
