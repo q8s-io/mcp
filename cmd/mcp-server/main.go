@@ -8,6 +8,7 @@ import (
 	"github.com/q8s-io/mcp/cmd/mcp-server/app/options"
 	"github.com/q8s-io/mcp/pkg/config"
 	"github.com/q8s-io/mcp/pkg/db/mysql"
+	"github.com/q8s-io/mcp/pkg/k8s"
 	"github.com/q8s-io/mcp/pkg/server"
 )
 
@@ -29,6 +30,12 @@ func main() {
 		return
 	}
 	defer mysql.CloseDB()
+
+	// start k8s client
+	if err := k8s.Start(); err != nil {
+		klog.Errorf("error to start k8s engine, %v", err)
+		return
+	}
 
 	// start server
 	if err := server.StartServer(opts); err != nil {

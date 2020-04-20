@@ -26,5 +26,5 @@ type ErrorMessage struct {
 func (r *Resource) ResponseError(resp *restful.Response, httpStatus int, err error) {
 	r.ResponseHeaderAndValue(resp, httpStatus, ErrorMessage{
 		Message: err.Error(),
-	}) //nolint
+	})
 }
