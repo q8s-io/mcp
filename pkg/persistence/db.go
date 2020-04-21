@@ -1,4 +1,4 @@
-package mysql
+package persistence
 
 import (
 	"fmt"
@@ -13,11 +13,11 @@ import (
 
 var dbPool *gorm.DB
 
-func GetDB() *gorm.DB {
-	return dbPool
+func SetDB(db *gorm.DB) {
+	dbPool = db
 }
 
-func InitDB(config *config.MysqlConfig) error {
+func InitDB(config *config.MysqlConfig) (*gorm.DB, bool) {
 	maxTimes := 5
 	// in order to ignore difference of time zone, use UTC as mysql server time_zone
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&time_zone='UTC'",
@@ -34,7 +34,7 @@ try:
 	if err != nil {
 		maxTimes--
 		if maxTimes <= 0 {
-			return err
+			return nil, false
 		}
 		if maxTimes > 0 {
 			klog.Infof("error to connect to mysql server, sleep 5 sec and retry, remain retry times: %d, %v", maxTimes, err)
@@ -54,7 +54,7 @@ try:
 	}
 
 	dbPool = db
-	return nil
+	return dbPool, true
 }
 
 func CloseDB() {

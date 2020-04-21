@@ -143,7 +143,7 @@ func (c *ControlPlanes) Setup() {
 		},
 	}
 
-	AzureMachineTemplate := capzv1.AzureMachineTemplate{
+	c.objects[1] = &capzv1.AzureMachineTemplate{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-ly-control-plane-template",
 			Namespace: "default",

@@ -1,50 +1,14 @@
-package cluster
+package service
 
 import (
-	"database/sql"
 	"errors"
-	"os"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"github.com/stretchr/testify/suite"
+
+	"github.com/q8s-io/mcp/pkg/dto"
 )
-
-type ModelSuite struct {
-	suite.Suite
-	DB   *gorm.DB
-	mock sqlmock.Sqlmock
-}
-
-func (s *ModelSuite) SetupSuite() {
-	var (
-		db  *sql.DB
-		err error
-	)
-
-	db, s.mock, err = sqlmock.New()
-	require.NoError(s.T(), err)
-
-	s.DB, err = gorm.Open("mysql", db)
-	require.NoError(s.T(), err)
-
-	isDebug := os.Getenv("debug")
-	if isDebug == "true" {
-		s.DB.LogMode(true)
-	}
-	s.DB.SingularTable(true)
-}
-
-func (s *ModelSuite) TearDownSuite() {
-	s.DB.Close()
-}
-
-func TestCluster(t *testing.T) {
-	suite.Run(t, new(ModelSuite))
-}
 
 func (s *ModelSuite) Test_GetByID() {
 	const sqlSelect = "SELECT \\* FROM `cluster`"
@@ -52,14 +16,14 @@ func (s *ModelSuite) Test_GetByID() {
 	tests := []struct {
 		name     string
 		id       uint
-		expected *DetailResp
+		expected *dto.ClusterDetailResp
 		err      error
 		mockFun  func()
 	}{
 		{
 			name: "getOneResult",
 			id:   1,
-			expected: &DetailResp{
+			expected: &dto.ClusterDetailResp{
 				Name: "test",
 			},
 			err: nil,
@@ -97,7 +61,7 @@ func (s *ModelSuite) Test_GetByID() {
 		s.T().Run(test.name, func(t *testing.T) {
 			// prepare mock sql
 			test.mockFun()
-			cluster, err := GetService().GetByID(s.DB, test.id)
+			cluster, err := NewClusterService().GetByID(test.id)
 			assert.Equal(t, test.err, err)
 			assert.Equal(t, test.expected, cluster)
 		})
@@ -109,13 +73,13 @@ func (s *ModelSuite) Test_All() {
 
 	tests := []struct {
 		name     string
-		expected []ListResp
+		expected []dto.ClusterListResp
 		err      error
 		mockFun  func()
 	}{
 		{
 			name: "getOneValue",
-			expected: []ListResp{
+			expected: []dto.ClusterListResp{
 				{
 					Name: "test",
 				},
@@ -128,7 +92,7 @@ func (s *ModelSuite) Test_All() {
 		},
 		{
 			name: "getTwoValues",
-			expected: []ListResp{
+			expected: []dto.ClusterListResp{
 				{
 					Name: "test1",
 				},
@@ -144,7 +108,7 @@ func (s *ModelSuite) Test_All() {
 		},
 		{
 			name:     "getNoValue",
-			expected: []ListResp{},
+			expected: []dto.ClusterListResp{},
 			err:      nil,
 			mockFun: func() {
 				s.mock.ExpectQuery(sql).
@@ -166,7 +130,7 @@ func (s *ModelSuite) Test_All() {
 		s.T().Run(test.name, func(t *testing.T) {
 			// prepare mock sql
 			test.mockFun()
-			clusters, err := GetService().All(s.DB)
+			clusters, err := NewClusterService().All()
 			assert.Equal(t, test.err, err)
 			assert.Equal(t, test.expected, clusters)
 		})
@@ -176,19 +140,19 @@ func (s *ModelSuite) Test_All() {
 func (s *ModelSuite) Test_Attach() {
 	tests := []struct {
 		name     string
-		req      *AttachReq
-		expected *AttachResp
+		req      *dto.ClusterAttachReq
+		expected *dto.ClusterAttachResp
 		err      error
 		mockFun  func()
 	}{
 		{
 			name: "attachSuccess",
-			req: &AttachReq{
+			req: &dto.ClusterAttachReq{
 				Name:       "success_cluster",
 				Kubeconfig: "a3ViZWNvbmZpZy1zdHJpbmc=",
 				Context:    "default-context",
 			},
-			expected: &AttachResp{
+			expected: &dto.ClusterAttachResp{
 				ID:           5,
 				KubeconfigID: 40,
 			},
@@ -204,7 +168,7 @@ func (s *ModelSuite) Test_Attach() {
 		},
 		{
 			name: "attachRollback",
-			req: &AttachReq{
+			req: &dto.ClusterAttachReq{
 				Name:       "rollback_cluster",
 				Kubeconfig: "a3ViZWNvbmZpZy1zdHJpbmc=",
 				Context:    "default-context",
@@ -226,7 +190,7 @@ func (s *ModelSuite) Test_Attach() {
 		s.T().Run(test.name, func(t *testing.T) {
 			// prepare mock sql
 			test.mockFun()
-			resp, err := GetService().Attach(s.DB, test.req)
+			resp, err := NewClusterService().Attach(test.req)
 			assert.Equal(t, test.err, err)
 			assert.Equal(t, test.expected, resp)
 		})

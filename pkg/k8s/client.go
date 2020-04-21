@@ -27,7 +27,8 @@ func Start() error {
 
 	var err error
 	mgr, err = ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
-		Scheme: scheme,
+		Scheme:             scheme,
+		MetricsBindAddress: "0", // metrics address uses 8080 for default which will conflicts with web server
 	})
 	if err != nil {
 		klog.Errorf("error to get k8s manager, %v", err)
