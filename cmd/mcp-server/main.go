@@ -7,8 +7,8 @@ import (
 
 	"github.com/q8s-io/mcp/cmd/mcp-server/app/options"
 	"github.com/q8s-io/mcp/pkg/config"
-	"github.com/q8s-io/mcp/pkg/db/mysql"
 	"github.com/q8s-io/mcp/pkg/k8s"
+	"github.com/q8s-io/mcp/pkg/persistence"
 	"github.com/q8s-io/mcp/pkg/server"
 )
 
@@ -25,11 +25,11 @@ func main() {
 		return
 	}
 
-	if err := mysql.InitDB(&conf.MysqlConfig); err != nil {
+	if _, ok := persistence.InitDB(&conf.MysqlConfig); !ok {
 		klog.Errorf("error to init mysql, %v", err)
 		return
 	}
-	defer mysql.CloseDB()
+	defer persistence.CloseDB()
 
 	// start k8s client
 	if err := k8s.Start(); err != nil {

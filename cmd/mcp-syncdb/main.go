@@ -6,16 +6,15 @@ import (
 
 	"k8s.io/klog"
 
-	"github.com/q8s-io/mcp/pkg/biz/cluster"
-	"github.com/q8s-io/mcp/pkg/biz/kubeconfig"
 	"github.com/q8s-io/mcp/pkg/config"
-	"github.com/q8s-io/mcp/pkg/db/mysql"
+	"github.com/q8s-io/mcp/pkg/domain/entity"
+	"github.com/q8s-io/mcp/pkg/persistence"
 )
 
 // regist module here to created table in database
 var tables = []interface{}{
-	cluster.Cluster{},
-	kubeconfig.Kubeconfig{},
+	entity.Cluster{},
+	entity.Kubeconfig{},
 }
 
 func main() {
@@ -39,10 +38,12 @@ func main() {
 		return
 	}
 
-	mysql.InitDB(&conf.MysqlConfig)
-
-	db := mysql.GetDB()
-	defer mysql.CloseDB()
+	db, ok := persistence.InitDB(&conf.MysqlConfig)
+	if !ok {
+		klog.Errorf("error to init DB, %v", err)
+		return
+	}
+	defer persistence.CloseDB()
 
 	// migrate table
 	for _, table := range tables {
