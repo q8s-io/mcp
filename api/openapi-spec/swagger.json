@@ -1,6 +1,29 @@
 {
 	"swagger": "2.0",
 	"paths": {
+		"/api/v1/azure/subscriptions": {
+			"get": {
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/json"
+				],
+				"summary": "Get subscriptions",
+				"operationId": "subscriptions",
+				"responses": {
+					"200": {
+						"description": "OK",
+						"schema": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/v1/clusters": {
 			"get": {
 				"consumes": [
@@ -17,7 +40,7 @@
 						"schema": {
 							"type": "array",
 							"items": {
-								"$ref": "#/definitions/cluster.AttachedClusterResp"
+								"$ref": "#/definitions/dto.ClusterListResp"
 							}
 						}
 					}
@@ -47,7 +70,7 @@
 						"in": "body",
 						"required": true,
 						"schema": {
-							"$ref": "#/definitions/cluster.AttachedClusterReq"
+							"$ref": "#/definitions/dto.ClusterAttachReq"
 						}
 					}
 				],
@@ -55,7 +78,7 @@
 					"201": {
 						"description": "OK",
 						"schema": {
-							"$ref": "#/definitions/cluster.AttachedClusterResp"
+							"$ref": "#/definitions/dto.ClusterAttachResp"
 						}
 					}
 				}
@@ -84,7 +107,7 @@
 					"200": {
 						"description": "OK",
 						"schema": {
-							"$ref": "#/definitions/cluster.AttachedClusterResp"
+							"$ref": "#/definitions/dto.ClusterDetailResp"
 						}
 					}
 				}
@@ -113,7 +136,7 @@
 					"200": {
 						"description": "OK",
 						"schema": {
-							"$ref": "#/definitions/kubeconfig.ClusterKubeconfigResp"
+							"$ref": "#/definitions/dto.KubeconfigResp"
 						}
 					}
 				}
@@ -121,7 +144,8 @@
 		}
 	},
 	"definitions": {
-		"cluster.AttachedClusterReq": {
+		"dto.AzureSubscriptionsResp": {},
+		"dto.ClusterAttachReq": {
 			"required": [
 				"name",
 				"kubeconfig",
@@ -142,7 +166,25 @@
 				}
 			}
 		},
-		"cluster.AttachedClusterResp": {
+		"dto.ClusterAttachResp": {
+			"required": [
+				"id",
+				"kubeconfigId"
+			],
+			"properties": {
+				"id": {
+					"description": "ID of cluster.",
+					"type": "integer",
+					"format": "integer"
+				},
+				"kubeconfigId": {
+					"description": "ID of kubeconfig.",
+					"type": "integer",
+					"format": "integer"
+				}
+			}
+		},
+		"dto.ClusterDetailResp": {
 			"required": [
 				"id",
 				"name",
@@ -175,55 +217,40 @@
 				}
 			}
 		},
-		"cluster.Cluster": {
+		"dto.ClusterListResp": {
 			"required": [
-				"ID",
-				"CreatedAt",
-				"UpdatedAt",
-				"DeletedAt",
-				"Kubeconfig",
-				"KubeconfigID",
-				"Name",
-				"Provider",
-				"Status"
+				"id",
+				"name",
+				"status",
+				"createdAt",
+				"provider"
 			],
 			"properties": {
-				"CreatedAt": {
+				"createdAt": {
+					"description": "Created time of attached cluster.",
 					"type": "string",
 					"format": "date-time"
 				},
-				"DeletedAt": {
-					"type": "string",
-					"format": "date-time"
-				},
-				"ID": {
+				"id": {
+					"description": "ID of attached cluster.",
 					"type": "integer",
 					"format": "integer"
 				},
-				"Kubeconfig": {
-					"$ref": "#/definitions/kubeconfig.Kubeconfig"
-				},
-				"KubeconfigID": {
-					"type": "integer",
-					"format": "integer"
-				},
-				"Name": {
+				"name": {
+					"description": "Name of attached cluster.",
 					"type": "string"
 				},
-				"Provider": {
+				"provider": {
+					"description": "Provider of attached cluster. Empty if no provider.",
 					"type": "string"
 				},
-				"Status": {
-					"type": "integer",
-					"format": "integer"
-				},
-				"UpdatedAt": {
-					"type": "string",
-					"format": "date-time"
+				"status": {
+					"description": "Status of attached cluster.",
+					"type": "string"
 				}
 			}
 		},
-		"kubeconfig.ClusterKubeconfigResp": {
+		"dto.KubeconfigResp": {
 			"required": [
 				"kubeconfig",
 				"context"
@@ -236,40 +263,6 @@
 				"kubeconfig": {
 					"description": "Kubeconfig info with Base64 format",
 					"type": "string"
-				}
-			}
-		},
-		"kubeconfig.Kubeconfig": {
-			"required": [
-				"ID",
-				"CreatedAt",
-				"UpdatedAt",
-				"DeletedAt",
-				"Kubeconfig",
-				"Context"
-			],
-			"properties": {
-				"Context": {
-					"type": "string"
-				},
-				"CreatedAt": {
-					"type": "string",
-					"format": "date-time"
-				},
-				"DeletedAt": {
-					"type": "string",
-					"format": "date-time"
-				},
-				"ID": {
-					"type": "integer",
-					"format": "integer"
-				},
-				"Kubeconfig": {
-					"type": "string"
-				},
-				"UpdatedAt": {
-					"type": "string",
-					"format": "date-time"
 				}
 			}
 		}

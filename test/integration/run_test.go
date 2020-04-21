@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/q8s-io/mcp/pkg/config"
-	"github.com/q8s-io/mcp/pkg/db/mysql"
+	"github.com/q8s-io/mcp/pkg/persistence"
 	"github.com/q8s-io/mcp/pkg/server"
 )
 
@@ -35,13 +35,16 @@ func before(t *testing.T) {
 	assert.NoError(t, err)
 
 	mysqlConfig := &conf.MysqlConfig
-	mysql.InitDB(mysqlConfig)
+	if _, ok := persistence.InitDB(mysqlConfig); !ok {
+		t.Errorf("error to init DB")
+		return
+	}
 
 	container = server.NewContainer()
 }
 
 func after(t *testing.T) {
-	mysql.CloseDB()
+	persistence.CloseDB()
 }
 
 func TestRun(t *testing.T) {

@@ -1,4 +1,4 @@
-package azure
+package service
 
 import (
 	"context"
@@ -7,22 +7,20 @@ import (
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/Azure/go-autorest/autorest/azure/auth"
 	"k8s.io/klog"
+
+	"github.com/q8s-io/mcp/pkg/constants"
+	"github.com/q8s-io/mcp/pkg/dto"
 )
 
-type Service struct{}
+type Azure struct{}
 
-var serviceInstance *Service
-
-func GetService() *Service {
-	if serviceInstance == nil {
-		serviceInstance = &Service{}
-	}
-	return serviceInstance
+func NewAzureService() *Azure {
+	return &Azure{}
 }
 
 // required params: AZURE_TENANT_ID、AZURE_CLIENT_ID、AZURE_CLIENT_SECRET
 // AZURE_ENVIRONMENT
-func (s *Service) subscriptions(subscriptionReq *SubscriptionsReq) (SubscriptionsListResp, error) {
+func (a *Azure) Subscriptions(subscriptionReq *dto.AzureSubscriptionsReq) (dto.AzureSubscriptionsResp, error) {
 	settings := auth.EnvironmentSettings{
 		Values: map[string]string{
 			auth.TenantID:     subscriptionReq.TenantID,
@@ -30,7 +28,7 @@ func (s *Service) subscriptions(subscriptionReq *SubscriptionsReq) (Subscription
 			auth.ClientSecret: subscriptionReq.ClientSecret,
 		},
 	}
-	environment, err := azure.EnvironmentFromName(environmentName_CN)
+	environment, err := azure.EnvironmentFromName(constants.EnvironmentNameCN)
 	if err != nil {
 		klog.Errorf("invalid environment name, %v", err)
 		return nil, err
@@ -43,7 +41,7 @@ func (s *Service) subscriptions(subscriptionReq *SubscriptionsReq) (Subscription
 		return nil, err
 	}
 
-	azClient := subscription.NewSubscriptionsClientWithBaseURI(defaultBaseURI_CN)
+	azClient := subscription.NewSubscriptionsClientWithBaseURI(constants.DefaultBaseURICN)
 	azClient.Authorizer = authorizer
 
 	result, err := azClient.List(context.TODO())
@@ -51,7 +49,7 @@ func (s *Service) subscriptions(subscriptionReq *SubscriptionsReq) (Subscription
 		return nil, err
 	}
 
-	subscriptionList := make(SubscriptionsListResp, len(result.Values()))
+	subscriptionList := make(dto.AzureSubscriptionsResp, len(result.Values()))
 	for index, subscription := range result.Values() {
 		subscriptionList[index] = *subscription.SubscriptionID
 	}

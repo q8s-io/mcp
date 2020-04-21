@@ -1,50 +1,14 @@
-package kubeconfig
+package service
 
 import (
-	"database/sql"
 	"errors"
-	"os"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"github.com/stretchr/testify/suite"
+
+	"github.com/q8s-io/mcp/pkg/dto"
 )
-
-type ModelSuite struct {
-	suite.Suite
-	DB   *gorm.DB
-	mock sqlmock.Sqlmock
-}
-
-func (s *ModelSuite) SetupSuite() {
-	var (
-		db  *sql.DB
-		err error
-	)
-
-	db, s.mock, err = sqlmock.New()
-	require.NoError(s.T(), err)
-
-	s.DB, err = gorm.Open("mysql", db)
-	require.NoError(s.T(), err)
-
-	isDebug := os.Getenv("debug")
-	if isDebug == "true" {
-		s.DB.LogMode(true)
-	}
-	s.DB.SingularTable(true)
-}
-
-func (s *ModelSuite) TearDownSuite() {
-	defer s.DB.Close()
-}
-
-func TestKubeconfig(t *testing.T) {
-	suite.Run(t, new(ModelSuite))
-}
 
 func (s *ModelSuite) Test_GetByClusterID() {
 	const sqlSelect = "SELECT \\* FROM `cluster_kubeconfig`"
@@ -52,14 +16,14 @@ func (s *ModelSuite) Test_GetByClusterID() {
 	tests := []struct {
 		name     string
 		id       uint
-		expected *ClusterKubeconfigResp
+		expected *dto.KubeconfigResp
 		err      error
 		mockFun  func()
 	}{
 		{
 			name: "getOneValue",
 			id:   1,
-			expected: &ClusterKubeconfigResp{
+			expected: &dto.KubeconfigResp{
 				Kubeconfig: "dGVzdA==",
 				Context:    "test",
 			},
@@ -97,7 +61,7 @@ func (s *ModelSuite) Test_GetByClusterID() {
 	for _, test := range tests {
 		s.T().Run(test.name, func(t *testing.T) {
 			test.mockFun()
-			kubeconfigResp, err := GetService().GetByClusterID(s.DB, test.id)
+			kubeconfigResp, err := NewKubeconfigService().GetByClusterID(test.id)
 			assert.Equal(t, test.err, err)
 			assert.Equal(t, test.expected, kubeconfigResp)
 		})

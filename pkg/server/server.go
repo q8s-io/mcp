@@ -9,18 +9,14 @@ import (
 
 	"github.com/q8s-io/mcp/cmd/mcp-server/app/options"
 	"github.com/q8s-io/mcp/pkg/filters"
-	"github.com/q8s-io/mcp/pkg/routers"
 )
 
 func NewContainer() *restful.Container {
 	container := restful.NewContainer()
-
 	ws := new(restful.WebService)
-	// import routers to webservice
-	routers.AddRouters(ws)
+	addRouters(ws)
 
 	container.Add(ws)
-
 	return container
 }
 
