@@ -5,5 +5,6 @@ import (
 )
 
 type KubeconfigRepository interface {
+	// GetByClusterID gets Kubeconfig by cluster id.
 	GetByClusterID(id uint) (*entity.Kubeconfig, error)
 }

@@ -1,6 +1,7 @@
 package persistence
 
 import (
+	"database/sql/driver"
 	"fmt"
 	"time"
 
@@ -25,6 +26,7 @@ func GetRepositories() *Repositories {
 	return repositories
 }
 
+// NewRepositories creates repositories with specified db.
 func NewRepositories(db *gorm.DB) {
 	repositories = &Repositories{
 		DB: db,
@@ -34,6 +36,7 @@ func NewRepositories(db *gorm.DB) {
 	}
 }
 
+// InitDB creates db connect to config and creates Repositories.
 func InitDB(config *config.MysqlConfig) (*Repositories, bool) {
 	maxTimes := 5
 	// in order to ignore difference of time zone, use UTC as mysql server time_zone
@@ -49,6 +52,11 @@ func InitDB(config *config.MysqlConfig) (*Repositories, bool) {
 try:
 	db, err := gorm.Open("mysql", dsn)
 	if err != nil {
+		if err != driver.ErrBadConn {
+			klog.Errorf("error to connect to mysql server, %v", err)
+			return nil, false
+		}
+
 		maxTimes--
 		if maxTimes <= 0 {
 			return nil, false
