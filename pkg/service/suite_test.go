@@ -37,7 +37,7 @@ func (s *ModelSuite) SetupSuite() {
 	}
 	s.DB.SingularTable(true)
 
-	persistence.SetDB(s.DB)
+	persistence.NewRepositories(s.DB)
 }
 
 func (s *ModelSuite) TearDownSuite() {

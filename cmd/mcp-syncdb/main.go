@@ -38,7 +38,7 @@ func main() {
 		return
 	}
 
-	db, ok := persistence.InitDB(&conf.MysqlConfig)
+	repositories, ok := persistence.InitDB(&conf.MysqlConfig)
 	if !ok {
 		klog.Errorf("error to init DB, %v", err)
 		return
@@ -49,7 +49,7 @@ func main() {
 	for _, table := range tables {
 		module := reflect.TypeOf(table).Name()
 		klog.Infof("auto migrate module[%s]", module)
-		err := db.Set("gorm:table_options", "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4").AutoMigrate(table).Error
+		err := repositories.DB.Set("gorm:table_options", "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4").AutoMigrate(table).Error
 		if err != nil {
 			klog.Errorf("error to migrate module[%s]", module)
 			return
