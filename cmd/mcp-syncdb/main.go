@@ -15,6 +15,7 @@ import (
 var tables = []interface{}{
 	entity.Cluster{},
 	entity.Kubeconfig{},
+	entity.Secret_Azures{},
 }
 
 func main() {

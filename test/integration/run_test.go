@@ -52,4 +52,5 @@ func TestRun(t *testing.T) {
 	defer after(t)
 
 	newClusterTest().runTest(t)
+	newSecretTest().runTest(t)
 }
