@@ -19,7 +19,7 @@ services:
     image: docker.io/q8sio/mcp:dev
     depends_on:
       - mysql
-    command: "/wait-for.sh mysql:3306 -- /manager --config=configs/config-dev.yaml"
+    command: "/wait-for.sh mysql:3306 -- /mcp-server --config=configs/config-dev.yaml"
     volumes:
       - "./configs/config-dev.yaml:/configs/config-dev.yaml"
       - "./wait-for.sh:/wait-for.sh"

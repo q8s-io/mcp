@@ -1,4 +1,4 @@
-# Build the manager binary
+## Build the mcp-server binary
 FROM golang:1.13-alpine as builder
 WORKDIR /workspace
 
@@ -20,10 +20,10 @@ COPY ./ ./
 ARG ARCH
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=${ARCH} \
     go build -a -ldflags '-extldflags "-static"' \
-    -o manager ./cmd/mcp-server
+    -o mcp-server ./cmd/mcp-server
 
-# Copy the controller-manager into a thin image
+## Copy the mcp-server into a thin image
 FROM alpine:3.11
 WORKDIR /
-COPY --from=builder /workspace/manager .
-CMD ["/manager"]
+COPY --from=builder /workspace/mcp-server .
+CMD ["/mcp-server"]
