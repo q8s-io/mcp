@@ -1,6 +1,7 @@
 package persistence
 
 import (
+	"database/sql/driver"
 	"fmt"
 	"time"
 
@@ -9,15 +10,34 @@ import (
 	"k8s.io/klog"
 
 	"github.com/q8s-io/mcp/pkg/config"
+	"github.com/q8s-io/mcp/pkg/domain/repository"
 )
 
-var dbPool *gorm.DB
+var repositories *Repositories
 
-func SetDB(db *gorm.DB) {
-	dbPool = db
+type Repositories struct {
+	DB *gorm.DB
+
+	ClusterRepo    repository.ClusterRepository
+	KubeconfigRepo repository.KubeconfigRepository
 }
 
-func InitDB(config *config.MysqlConfig) (*gorm.DB, bool) {
+func GetRepositories() *Repositories {
+	return repositories
+}
+
+// NewRepositories creates repositories with specified db.
+func NewRepositories(db *gorm.DB) {
+	repositories = &Repositories{
+		DB: db,
+
+		ClusterRepo:    newClusterRepository(db),
+		KubeconfigRepo: newKubeconfigRepository(db),
+	}
+}
+
+// InitDB creates db connect to config and creates Repositories.
+func InitDB(config *config.MysqlConfig) (*Repositories, bool) {
 	maxTimes := 5
 	// in order to ignore difference of time zone, use UTC as mysql server time_zone
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&time_zone='UTC'",
@@ -32,6 +52,11 @@ func InitDB(config *config.MysqlConfig) (*gorm.DB, bool) {
 try:
 	db, err := gorm.Open("mysql", dsn)
 	if err != nil {
+		if err != driver.ErrBadConn {
+			klog.Errorf("error to connect to mysql server, %v", err)
+			return nil, false
+		}
+
 		maxTimes--
 		if maxTimes <= 0 {
 			return nil, false
@@ -53,12 +78,12 @@ try:
 		db.LogMode(true)
 	}
 
-	dbPool = db
-	return dbPool, true
+	NewRepositories(db)
+	return repositories, true
 }
 
 func CloseDB() {
-	if dbPool != nil {
-		dbPool.Close()
+	if repositories != nil {
+		repositories.DB.Close()
 	}
 }

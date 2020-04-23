@@ -6,17 +6,17 @@ import (
 	"github.com/q8s-io/mcp/pkg/domain/entity"
 )
 
-type Kubeconfig struct {
-	base
+type KubeconfigRepo struct {
+	db *gorm.DB
 }
 
-func NewKubeconfigPersistence() *Kubeconfig {
-	return &Kubeconfig{}
+func newKubeconfigRepository(db *gorm.DB) *KubeconfigRepo {
+	return &KubeconfigRepo{db}
 }
 
-func (k *Kubeconfig) GetByClusterID(id uint) (*entity.Kubeconfig, error) {
+func (r *KubeconfigRepo) GetByClusterID(id uint) (*entity.Kubeconfig, error) {
 	var kubeconfig entity.Kubeconfig
-	if err := k.GetDB().Where("cluster_id=?", id).First(&kubeconfig).Error; err != nil {
+	if err := r.db.Where("cluster_id=?", id).First(&kubeconfig).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, nil
 		}
