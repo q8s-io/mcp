@@ -27,21 +27,3 @@ func (s *SecretAttachReq) ConvertToCluster() (*entity.Secret_Azure,error) {
 		ClientSecret: s.ClientSecret,
 	},nil
 }
-
-//
-//func (r *ClusterAttachReq) ConvertToCluster() (*entity.Cluster, error) {
-//	decodeBytes, err := base64.StdEncoding.DecodeString(r.Kubeconfig)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	return &entity.Cluster{
-//		Name:     r.Name,
-//		Provider: entity.AttachedProvider,
-//		Status:   entity.StatusOk,
-//		Kubeconfig: entity.Kubeconfig{
-//			Kubeconfig: string(decodeBytes),
-//			Context:    r.Context,
-//		},
-//	}, nil
-//}
