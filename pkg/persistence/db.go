@@ -20,6 +20,7 @@ type Repositories struct {
 
 	ClusterRepo    repository.ClusterRepository
 	KubeconfigRepo repository.KubeconfigRepository
+	AzureSecretRepo repository.AzureSecretRepository
 }
 
 func GetRepositories() *Repositories {
@@ -33,6 +34,8 @@ func NewRepositories(db *gorm.DB) {
 
 		ClusterRepo:    newClusterRepository(db),
 		KubeconfigRepo: newKubeconfigRepository(db),
+		AzureSecretRepo: newSecretRepository(db),
+
 	}
 }
 
