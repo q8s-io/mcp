@@ -14,4 +14,5 @@ func addRouters(ws *restful.WebService) {
 	controller.NewClusterController().Regist(ws)
 	controller.NewKubeconfigController().Regist(ws)
 	controller.NewAzureController().Regist(ws)
+	controller.NewSecretController().Regist(ws)
 }
