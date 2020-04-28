@@ -1,22 +1,23 @@
 package service
 
 import (
+	"github.com/q8s-io/mcp/pkg/domain/repository"
 	"github.com/q8s-io/mcp/pkg/dto"
 	"github.com/q8s-io/mcp/pkg/persistence"
 )
 
 type Cluster struct {
-	clusterPersistence *persistence.Cluster
+	clusterRepo repository.ClusterRepository
 }
 
 func NewClusterService() *Cluster {
 	return &Cluster{
-		clusterPersistence: persistence.NewClusterPersistence(),
+		clusterRepo: persistence.GetRepositories().ClusterRepo,
 	}
 }
 
 func (c *Cluster) All() ([]dto.ClusterListResp, error) {
-	clusters, err := c.clusterPersistence.GetAll()
+	clusters, err := c.clusterRepo.GetAll()
 	if err != nil {
 		return nil, err
 	}
@@ -31,7 +32,7 @@ func (c *Cluster) All() ([]dto.ClusterListResp, error) {
 }
 
 func (c *Cluster) GetByID(id uint) (*dto.ClusterDetailResp, error) {
-	cluster, err := c.clusterPersistence.GetByID(id)
+	cluster, err := c.clusterRepo.GetByID(id)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +51,7 @@ func (c *Cluster) Attach(attachCluster *dto.ClusterAttachReq) (*dto.ClusterAttac
 		return nil, err
 	}
 
-	err = c.clusterPersistence.Add(cluster)
+	err = c.clusterRepo.Add(cluster)
 	if err != nil {
 		return nil, err
 	}

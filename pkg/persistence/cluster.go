@@ -6,17 +6,17 @@ import (
 	"github.com/q8s-io/mcp/pkg/domain/entity"
 )
 
-type Cluster struct {
-	base
+type ClusterRepo struct {
+	db *gorm.DB
 }
 
-func NewClusterPersistence() *Cluster {
-	return &Cluster{}
+func newClusterRepository(db *gorm.DB) *ClusterRepo {
+	return &ClusterRepo{db}
 }
 
-func (c *Cluster) GetAll() (entity.Clusters, error) {
+func (r *ClusterRepo) GetAll() (entity.Clusters, error) {
 	var clusters entity.Clusters
-	if err := c.GetDB().Find(&clusters).Error; err != nil {
+	if err := r.db.Find(&clusters).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, nil
 		}
@@ -25,9 +25,9 @@ func (c *Cluster) GetAll() (entity.Clusters, error) {
 	return clusters, nil
 }
 
-func (c *Cluster) GetByID(id uint) (*entity.Cluster, error) {
+func (r *ClusterRepo) GetByID(id uint) (*entity.Cluster, error) {
 	var cluster entity.Cluster
-	if err := c.GetDB().Where("id=?", id).First(&cluster).Error; err != nil {
+	if err := r.db.Where("id=?", id).First(&cluster).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, nil
 		}
@@ -36,6 +36,6 @@ func (c *Cluster) GetByID(id uint) (*entity.Cluster, error) {
 	return &cluster, nil
 }
 
-func (c *Cluster) Add(cluster *entity.Cluster) error {
-	return c.GetDB().Create(cluster).Error
+func (r *ClusterRepo) Add(cluster *entity.Cluster) error {
+	return r.db.Create(cluster).Error
 }
